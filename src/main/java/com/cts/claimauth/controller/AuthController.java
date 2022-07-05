@@ -12,7 +12,10 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,13 +24,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
-
+import com.cts.claimauth.exception.TokenException;
 import com.cts.claimauth.models.Role;
 import com.cts.claimauth.models.URole;
 import com.cts.claimauth.models.User;
@@ -35,10 +40,12 @@ import com.cts.claimauth.payload.request.LoginRequest;
 import com.cts.claimauth.payload.request.SignupRequest;
 import com.cts.claimauth.payload.response.JwtResponse;
 import com.cts.claimauth.payload.response.MessageResponse;
+import com.cts.claimauth.payload.response.TokenValidation;
 import com.cts.claimauth.repository.RoleRepository;
 import com.cts.claimauth.repository.UserRepository;
 import com.cts.claimauth.security.jwt.AuthEntryPointJwt;
 import com.cts.claimauth.security.jwt.JwtUtils;
+import com.cts.claimauth.security.services.UserDetailServiceImpl;
 import com.cts.claimauth.security.services.UserDetailsImpl;
 
 @RestController
@@ -60,6 +67,9 @@ public class AuthController {
   
   @Autowired
   JwtUtils jwtUtils;
+  
+  @Autowired
+  UserDetailServiceImpl userDetailsService;
   
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest){
@@ -115,5 +125,29 @@ public class AuthController {
 	  Optional<User> user=userRepository.findById(id);
 	  return ResponseEntity.ok(user);
   }
+  
+  @GetMapping(path = "/validate")
+   public ResponseEntity<?> validatingAuthorizationToken( @RequestHeader(name = "Authorization") String tokenDup) {
+		
+		logger.info("BEGIN - [validatingAuthorizationToken(JWT-token)]");
+		String token = tokenDup.substring(7);
+		logger.info(token);		
+		try {
+			if (Boolean.TRUE.equals(jwtUtils.validateJwtToken(token))) {
+				logger.debug("Token matched is Valid");
+				logger.info("Token matched is Valid");
+				logger.info("END - validate()");
+				return new ResponseEntity<>(new TokenValidation(true), HttpStatus.OK);
+			} else {
+				throw new TokenException(token,"Invalid Token");
+			}
+		} catch (Exception e) {
+			logger.debug("Invalid token - Bad Credentials Exception");
+			logger.info("END Exception - validatingAuthorizationToken()");
+			
+			return new ResponseEntity<>(new TokenValidation(false), HttpStatus.BAD_REQUEST);
+		}
+		
+	}
   
 }

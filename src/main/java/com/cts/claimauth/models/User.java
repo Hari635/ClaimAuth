@@ -29,10 +29,16 @@ public class User {
     private String email;
     
     @NotBlank
-    
+    @Size(max=1000)
     private String password;
     
-    @NotBlank
+    @Override
+	public String toString() {
+		return "User [userId=" + userId + "]";
+	}
+
+
+	@NotBlank
     @Size(min=10,max=10)
     private String phoneNo;
     
