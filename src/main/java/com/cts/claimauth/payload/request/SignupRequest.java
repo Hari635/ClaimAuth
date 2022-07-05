@@ -1,5 +1,7 @@
 package com.cts.claimauth.payload.request;
 
+import java.util.Set;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -25,16 +27,15 @@ public class SignupRequest {
 	@NotBlank
 	private String address;
 	
-	@NotBlank
-	private String role;
+//	private Set<String> role;
 
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
+//	public Set<String> getRole() {
+//		return role;
+//	}
+//
+//	public void setRole(Set<String> role) {
+//		this.role = role;
+//	}
 
 	public String getName() {
 		return name;

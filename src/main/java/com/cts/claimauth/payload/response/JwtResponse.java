@@ -1,12 +1,14 @@
 package com.cts.claimauth.payload.response;
 
+import java.util.List;
+
 public class JwtResponse {
     private String token;
     private String type="Bearer";
     private Long userid;
     private String name;
     private String email;
-    private String roles;
+    private List<String> roles;
 	public String getToken() {
 		return token;
 	}
@@ -31,13 +33,13 @@ public class JwtResponse {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public String getRoles() {
+	public List<String> getRoles() {
 		return roles;
 	}
-	public void setRoles(String roles) {
+	public void setRoles(List<String> roles) {
 		this.roles = roles;
 	}
-	public JwtResponse(String token, Long userid, String name, String email, String roles) {
+	public JwtResponse(String token, Long userid, String name, String email, List<String> roles) {
 		super();
 		this.token = token;
 		this.userid = userid;
@@ -45,5 +47,5 @@ public class JwtResponse {
 		this.email = email;
 		this.roles = roles;
 	}
-    
+	
 }

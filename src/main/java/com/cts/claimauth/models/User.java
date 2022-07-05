@@ -29,7 +29,7 @@ public class User {
     private String email;
     
     @NotBlank
-    @Size(min=8,max=20)
+    
     private String password;
     
     @NotBlank
@@ -41,16 +41,14 @@ public class User {
     
     @ManyToMany(fetch=FetchType.LAZY)
     @JoinTable(name="user_roles",joinColumns=@JoinColumn(name="user_id"),inverseJoinColumns=@JoinColumn(name="role_id"))
-    private String roles;
+    private Set<Role> roles=new HashSet<>();
 
     public User() {
     	
     }
 	
 
-	public User(@NotBlank @Size(min = 4, max = 20) String name, @NotBlank @Size(max = 50) @Email String email,
-			@NotBlank @Size(min = 8, max = 20) String password, @NotBlank @Size(min = 10, max = 10) String phoneNo,
-			@NotBlank String address) {
+	public User(String name, String email, String password, String phoneNo,String address) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
@@ -107,12 +105,16 @@ public class User {
 		this.address = address;
 	}
 
-	public String getRoles() {
+
+	public Set<Role> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(String roles) {
+
+	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
+
+	
     
 }
