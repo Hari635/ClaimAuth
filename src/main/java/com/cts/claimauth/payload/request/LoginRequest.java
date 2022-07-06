@@ -4,17 +4,17 @@ import javax.validation.constraints.NotBlank;
 
 public class LoginRequest {
 	
-	
-	private Long userid;
+	@NotBlank
+	private String userid;
 	
 	@NotBlank
 	private String password;
 
-	public Long getUserid() {
+	public String getUserid() {
 		return userid;
 	}
 
-	public void setUserid(Long userid) {
+	public void setUserid(String userid) {
 		this.userid = userid;
 	}
 

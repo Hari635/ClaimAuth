@@ -74,6 +74,9 @@ public class AuthController {
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest){
 	  logger.info("inside the signin---%%%------");
+	  logger.info("inside the signin---%%%------");
+	  logger.info(loginRequest.getUserid().toString());
+	  
 	  Authentication authentication=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserid().toString(),loginRequest.getPassword()));
 	  logger.info("inside the signinout---%%%------");
 	  SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -85,10 +88,14 @@ public class AuthController {
 	    String jwt = jwtUtils.generateJwtToken(userDetails);
 	    List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 	            .collect(Collectors.toList());
+	    Optional<User> optionalUser=userRepository.findByUserId(userDetails.getUserid());
+	    User user=optionalUser.get();
 	    
 	    return ResponseEntity.ok(new JwtResponse(jwt,userDetails.getUserid(),
-	            userDetails.getUsername(), userDetails.getEmail(), roles));
+	            user.getName(), userDetails.getEmail(), roles));
   }
+  
+  
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 	  
