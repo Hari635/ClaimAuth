@@ -127,13 +127,44 @@ public class AuthController {
 	            user.getName(), user.getEmail(),roleslist));
   }
   
+  @PostMapping("/adminsignup")
+  public ResponseEntity<?> registerAdminUser(@Valid @RequestBody SignupRequest signUpRequest) {
+	  
+	  if (userRepository.existsByPhoneNo(signUpRequest.getPhoneNo())) {
+	      return ResponseEntity.badRequest().body(new MessageResponse("Error: PhoneNo is already taken!"));
+	    }
+
+	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+	      return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+	    }
+	    
+	    
+	    User user = new User(signUpRequest.getName(), signUpRequest.getEmail(),
+	            encoder.encode(signUpRequest.getPassword()),signUpRequest.getPhoneNo(),signUpRequest.getAddress());
+	    
+	    Set<Role> roles = new HashSet<>();
+	    
+	    Role userRole = roleRepository.findByName(URole.ROLE_ADMIN)
+	            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+	        roles.add(userRole); 
+	        
+	   user.setRoles(roles);
+	   userRepository.save(user);
+	   List<String> roleslist = roles.stream().map(item->item.getName().toString()).collect(Collectors.toList());
+	   
+	   String jwt = jwtUtils.generateTokenFromUserId(user.getUserId());
+	   
+	   return ResponseEntity.ok(new JwtResponse(jwt,user.getUserId(),
+	            user.getName(), user.getEmail(),roleslist));
+  }
+  
   @GetMapping("/{id}")
   public ResponseEntity<?>  getUser(@PathVariable Long id){
 	  Optional<User> user=userRepository.findById(id);
 	  return ResponseEntity.ok(user);
   }
   
-  @GetMapping(path = "/validate")
+  @GetMapping(path = "/validate-v1")
    public ResponseEntity<?> validatingAuthorizationToken( @RequestHeader(name = "Authorization") String tokenDup) {
 		
 		logger.info("BEGIN - [validatingAuthorizationToken(JWT-token)]");
@@ -156,5 +187,33 @@ public class AuthController {
 		}
 		
 	}
+  @GetMapping(path = "/validate/{tokenDup}")
+  public ResponseEntity<?> validatingAuthorizationTokenService( @PathVariable String tokenDup) {
+		
+		logger.info("BEGIN - [validatingAuthorizationToken(JWT-token)]");
+		String token = tokenDup.substring(7);
+		logger.info(token);		
+		try {
+			if (Boolean.TRUE.equals(jwtUtils.validateJwtToken(token))) {
+				logger.debug("Token matched is Valid");
+				logger.info("Token matched is Valid");
+				logger.info("END - validate()");
+				return new ResponseEntity<>(new TokenValidation(true), HttpStatus.OK);
+			} else {
+				throw new TokenException(token,"Invalid Token");
+			}
+		} catch (Exception e) {
+			logger.debug("Invalid token - Bad Credentials Exception");
+			logger.info("END Exception - validatingAuthorizationToken()");
+			
+			return new ResponseEntity<>(new TokenValidation(false), HttpStatus.OK);
+		}
+		
+	}
+  @GetMapping(path="/check")
+  public ResponseEntity<?> checkStatus(){
+	  return new ResponseEntity<>(new TokenValidation(true),HttpStatus.OK);
+  }
   
+ 
 }
