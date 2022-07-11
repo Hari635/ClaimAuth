@@ -137,7 +137,7 @@ public class AuthService {
 		}
 	}
 	
-	public JwtResponse searchUser(String id,SignupRequest signUpRequest) {
+	public User searchUser(String id,SignupRequest signUpRequest) {
 		Long useId=Long.parseLong(id);
 		Optional<User> optionalUser=userRepository.findByUserId(useId);
 		User user=optionalUser.get();
@@ -158,8 +158,8 @@ public class AuthService {
 		}
 		userRepository.save(user);
 		
-		
-		return new JwtResponse(null,user.getUserId(),user.getName(),user.getEmail(),null);
+		return user;
+//		return new JwtResponse(null,user.getUserId(),user.getName(),user.getEmail(),null);
 		
 	}
 }

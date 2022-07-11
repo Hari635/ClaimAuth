@@ -3,6 +3,7 @@ package com.cts.claimauth.controller;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -186,8 +187,12 @@ public class AuthController {
   
   @PostMapping("/{id}")
   public ResponseEntity<?>  getUser(@PathVariable String id, @RequestBody SignupRequest signUpRequest){
-	  JwtResponse searchUser = authService.searchUser(id, signUpRequest);
-	  return new ResponseEntity<JwtResponse>(searchUser,HttpStatus.CREATED);
+	  try {
+	  User searchUser = authService.searchUser(id, signUpRequest);
+	  return new ResponseEntity<User>(searchUser,HttpStatus.CREATED);
+	  }catch(NoSuchElementException e) {
+		  return new ResponseEntity<>(new MessageResponse("Not found the user with id "+id),HttpStatus.BAD_REQUEST);
+	  }
 		  
 	  
   }
@@ -215,9 +220,9 @@ public class AuthController {
 //		}
 		try {
 			TokenValidation tokenValidation =authService.validationToken(tokenDup);
-			return new ResponseEntity<>(tokenValidation,HttpStatus.OK);
+			return new ResponseEntity<>(tokenValidation,HttpStatus.ACCEPTED);
 		}catch(Exception e) {
-			return new ResponseEntity<>(new TokenValidation(false),HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(new TokenValidation(false),HttpStatus.UNAUTHORIZED);
 		}
 	}
   @GetMapping(path = "/validate/{tokenDup}")
@@ -231,7 +236,7 @@ public class AuthController {
 				logger.debug("Token matched is Valid");
 				logger.info("Token matched is Valid");
 				logger.info("END - validate()");
-				return new ResponseEntity<>(new TokenValidation(true), HttpStatus.OK);
+				return new ResponseEntity<>(new TokenValidation(true), HttpStatus.ACCEPTED);
 			} else {
 				throw new TokenException(token,"Invalid Token");
 			}
@@ -239,7 +244,7 @@ public class AuthController {
 			logger.debug("Invalid token - Bad Credentials Exception");
 			logger.info("END Exception - validatingAuthorizationToken()");
 			
-			return new ResponseEntity<>(new TokenValidation(false), HttpStatus.OK);
+			return new ResponseEntity<>(new TokenValidation(false), HttpStatus.UNAUTHORIZED);
 		}
 		
 	}
@@ -247,7 +252,7 @@ public class AuthController {
   public ResponseEntity<?> checkUser(@RequestHeader(name = "Authorization") String tokenDup,@PathVariable String id){
 	  TokenValidation validationToken = authService.validationToken(tokenDup);
 	  if(!validationToken.getToken()) {
-		  return new ResponseEntity<>(new MessageResponse("not Validated token"),HttpStatus.BAD_REQUEST);
+		  return new ResponseEntity<>(new MessageResponse("not Validated token"),HttpStatus.UNAUTHORIZED);
 	  }
 	  try {
 	  Optional<User> findByUserId = userRepository.findByUserId(Long.parseLong(id));
@@ -262,7 +267,7 @@ public class AuthController {
   public ResponseEntity<?>getAllUser(@RequestHeader(name = "Authorization") String tokenDup){
 	  TokenValidation validationToken=authService.validationToken(tokenDup);
 	  if(!validationToken.getToken()) {
-		  return new ResponseEntity<>(new MessageResponse("not Validated token"),HttpStatus.BAD_REQUEST);
+		  return new ResponseEntity<>(new MessageResponse("not Validated token"),HttpStatus.UNAUTHORIZED);
 	  }
 	     List<User> allUser= userRepository.findAll();
 	     return new ResponseEntity<>(allUser,HttpStatus.OK);
