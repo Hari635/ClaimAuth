@@ -52,6 +52,7 @@ import com.cts.claimauth.security.jwt.JwtUtils;
 import com.cts.claimauth.security.services.UserDetailServiceImpl;
 import com.cts.claimauth.security.services.UserDetailsImpl;
 import com.cts.claimauth.service.AuthService;
+import com.cts.claimauth.service.AuthServiceImpl;
 
 @RestController
 @CrossOrigin(origins = "*",allowedHeaders = "*",methods = {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE} )
@@ -76,31 +77,13 @@ public class AuthController {
   @Autowired
   UserDetailServiceImpl userDetailsService;
   
+//  @Autowired
+//  AuthServiceImpl authService;
   @Autowired
   AuthService authService;
   
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest){
-//	  logger.info("inside the signin---%%%------");
-//	  logger.info("inside the signin---%%%------");
-//	  logger.info(loginRequest.getUserid().toString());
-//	  
-//	  Authentication authentication=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserid().toString(),loginRequest.getPassword()));
-//	  logger.info("inside the signinout---%%%------");
-//	  SecurityContextHolder.getContext().setAuthentication(authentication);
-//	  logger.info("inside the signinouted---%%%------");
-//
-//	    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//	    logger.info(userDetails.getUserid().toString());
-//
-//	    String jwt = jwtUtils.generateJwtToken(userDetails);
-//	    List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-//	            .collect(Collectors.toList());
-//	    Optional<User> optionalUser=userRepository.findByUserId(userDetails.getUserid());
-//	    User user=optionalUser.get();
-//	    
-//	    return ResponseEntity.ok(new JwtResponse(jwt,userDetails.getUserid(),
-//	            user.getName(), userDetails.getEmail(), roles));
 	  JwtResponse jwtResponse=authService.signInResponse(loginRequest.getUserid().toString(), loginRequest.getPassword());
 	  return ResponseEntity.ok(jwtResponse);
   }
@@ -108,14 +91,7 @@ public class AuthController {
   
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-//	  
-//	  if (userRepository.existsByPhoneNo(signUpRequest.getPhoneNo())) {
-//	      return ResponseEntity.badRequest().body(new MessageResponse("Error: PhoneNo is already taken!"));
-//	    }
-//
-//	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-//	      return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-//	    }
+
 	  if(authService.existPhoneNo(signUpRequest.getPhoneNo())) {
 		  return ResponseEntity.badRequest().body(new MessageResponse("Error: PhoneNo is already taken!"));
 	  }
@@ -124,23 +100,7 @@ public class AuthController {
           
       }
 	    
-//	    User user = new User(signUpRequest.getName(), signUpRequest.getEmail(),
-//	            encoder.encode(signUpRequest.getPassword()),signUpRequest.getPhoneNo(),signUpRequest.getAddress());
-//	    
-//	    Set<Role> roles = new HashSet<>();
-//	    
-//	    Role userRole = roleRepository.findByName(URole.ROLE_USER)
-//	            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//	        roles.add(userRole); 
-//	        
-//	   user.setRoles(roles);
-//	   userRepository.save(user);
-//	   List<String> roleslist = roles.stream().map(item->item.getName().toString()).collect(Collectors.toList());
-//	   
-//	   String jwt = jwtUtils.generateTokenFromUserId(user.getUserId());
-//	   
-//	   return ResponseEntity.ok(new JwtResponse(jwt,user.getUserId(),
-//	            user.getName(), user.getEmail(),roleslist));
+
 	  JwtResponse jwtResponse=authService.signupResponse(signUpRequest.getName(), signUpRequest.getEmail(),signUpRequest.getPassword(), signUpRequest.getPhoneNo(),signUpRequest.getAddress());
 	  return ResponseEntity.ok(jwtResponse);
   }
@@ -148,13 +108,7 @@ public class AuthController {
   @PostMapping("/adminsignup")
   public ResponseEntity<?> registerAdminUser(@Valid @RequestBody SignupRequest signUpRequest) {
 	  
-//	  if (userRepository.existsByPhoneNo(signUpRequest.getPhoneNo())) {
-//	      return ResponseEntity.badRequest().body(new MessageResponse("Error: PhoneNo is already taken!"));
-//	    }
-//
-//	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-//	      return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-//	    }
+
 	  if(authService.existPhoneNo(signUpRequest.getPhoneNo())) {
 		  return ResponseEntity.badRequest().body(new MessageResponse("Error: PhoneNo is already taken!"));
 	  }
@@ -163,24 +117,6 @@ public class AuthController {
           
       }
 	    
-	    
-//	    User user = new User(signUpRequest.getName(), signUpRequest.getEmail(),
-//	            encoder.encode(signUpRequest.getPassword()),signUpRequest.getPhoneNo(),signUpRequest.getAddress());
-//	    
-//	    Set<Role> roles = new HashSet<>();
-//	    
-//	    Role userRole = roleRepository.findByName(URole.ROLE_ADMIN)
-//	            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//	        roles.add(userRole); 
-//	        
-//	   user.setRoles(roles);
-//	   userRepository.save(user);
-//	   List<String> roleslist = roles.stream().map(item->item.getName().toString()).collect(Collectors.toList());
-//	   
-//	   String jwt = jwtUtils.generateTokenFromUserId(user.getUserId());
-//	   
-//	   return ResponseEntity.ok(new JwtResponse(jwt,user.getUserId(),
-//	            user.getName(), user.getEmail(),roleslist));
 	  JwtResponse jwtResponse=authService.adminSignUp(signUpRequest.getName(), signUpRequest.getEmail(),signUpRequest.getPassword(), signUpRequest.getPhoneNo(),signUpRequest.getAddress());
 	  return ResponseEntity.ok(jwtResponse);
   }
@@ -200,24 +136,7 @@ public class AuthController {
   @GetMapping(path = "/validate-v1")
    public ResponseEntity<?> validatingAuthorizationToken( @RequestHeader(name = "Authorization") String tokenDup) {
 		
-//		logger.info("BEGIN - [validatingAuthorizationToken(JWT-token)]");
-//		String token = tokenDup.substring(7);
-//		logger.info(token);		
-//		try {
-//			if (Boolean.TRUE.equals(jwtUtils.validateJwtToken(token))) {
-//				logger.debug("Token matched is Valid");
-//				logger.info("Token matched is Valid");
-//				logger.info("END - validate()");
-//				return new ResponseEntity<>(new TokenValidation(true), HttpStatus.OK);
-//			} else {
-//				throw new TokenException(token,"Invalid Token");
-//			}
-//		} catch (Exception e) {
-//			logger.debug("Invalid token - Bad Credentials Exception");
-//			logger.info("END Exception - validatingAuthorizationToken()");
-//			
-//			return new ResponseEntity<>(new TokenValidation(false), HttpStatus.BAD_REQUEST);
-//		}
+
 		try {
 			TokenValidation tokenValidation =authService.validationToken(tokenDup);
 			return new ResponseEntity<>(tokenValidation,HttpStatus.ACCEPTED);
@@ -227,23 +146,15 @@ public class AuthController {
 	}
   @GetMapping(path = "/validate/{tokenDup}")
   public ResponseEntity<?> validatingAuthorizationTokenService( @PathVariable String tokenDup) {
-		
-		logger.info("BEGIN - [validatingAuthorizationToken(JWT-token)]");
 		String token = tokenDup.substring(7);
-		logger.info(token);		
+	
 		try {
 			if (Boolean.TRUE.equals(jwtUtils.validateJwtToken(token))) {
-				logger.debug("Token matched is Valid");
-				logger.info("Token matched is Valid");
-				logger.info("END - validate()");
 				return new ResponseEntity<>(new TokenValidation(true), HttpStatus.ACCEPTED);
 			} else {
 				throw new TokenException(token,"Invalid Token");
 			}
 		} catch (Exception e) {
-			logger.debug("Invalid token - Bad Credentials Exception");
-			logger.info("END Exception - validatingAuthorizationToken()");
-			
 			return new ResponseEntity<>(new TokenValidation(false), HttpStatus.UNAUTHORIZED);
 		}
 		
@@ -255,8 +166,9 @@ public class AuthController {
 		  return new ResponseEntity<>(new MessageResponse("not Validated token"),HttpStatus.UNAUTHORIZED);
 	  }
 	  try {
-	  Optional<User> findByUserId = userRepository.findByUserId(Long.parseLong(id));
-	  User user=findByUserId.get();
+//	  Optional<User> findByUserId = userRepository.findByUserId(Long.parseLong(id));
+//	  User user=findByUserId.get();
+	  User user=authService.userCheck(id);
 	  return new ResponseEntity<>(user,HttpStatus.OK);
 	  }catch(Exception e) {
 		  return new ResponseEntity<>(new MessageResponse("Not found the user with id "+id),HttpStatus.BAD_REQUEST);

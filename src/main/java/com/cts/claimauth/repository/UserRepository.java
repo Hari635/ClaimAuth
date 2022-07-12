@@ -11,7 +11,7 @@ import com.cts.claimauth.models.User;
 public interface UserRepository extends JpaRepository<User,Long> {
   Optional<User> findByUserId(Long userId);
   
-  Boolean existsByUserId(Integer userId);
+  Boolean existsByUserId(Long userId);
   Boolean existsByPhoneNo(String Phoneno);
   Boolean existsByEmail(String email);
 }
