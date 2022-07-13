@@ -185,6 +185,31 @@ public class AuthController {
 	     return new ResponseEntity<>(allUser,HttpStatus.OK);
 	  
   }
+  @GetMapping(path="user-id/{id}")
+  public ResponseEntity<?>shouldUserPresent(@PathVariable String id){
+	  if(userRepository.existsByUserId(Long.parseLong(id))) {
+		  return new ResponseEntity<>(true,HttpStatus.OK);
+	  }else {
+		  return new ResponseEntity<>(false,HttpStatus.OK);
+	  }
+  }
+  @GetMapping(path="check-email/{email}")
+  public ResponseEntity<?>checkEmail(@PathVariable String email){
+	  if (authService.existEmail(email)) {
+          return new ResponseEntity<>(true,HttpStatus.OK);   
+      }else {
+    	  return new ResponseEntity<>(false,HttpStatus.OK);
+      }
+  }
+  
+  @GetMapping(path="check-phone/{phoneNo}")
+  public ResponseEntity<?>checkPhoneNo(@PathVariable String phoneNo){
+	  if(authService.existPhoneNo(phoneNo)) {
+		  return new ResponseEntity<>(true,HttpStatus.OK);
+	  }else {
+		  return new ResponseEntity<>(false,HttpStatus.OK);
+	  }
+  }
   
  
 }
